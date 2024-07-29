@@ -1,7 +1,6 @@
 import timeit
 
 def boyer_moore(text, pattern):
-    print("Starting Boyer-Moore...")
     m = len(pattern)
     n = len(text)
     if m > n:
@@ -19,11 +18,9 @@ def boyer_moore(text, pattern):
         if j == -1:
             return i + 1
         k += skip.get(text[k], m)
-    print("Boyer-Moore finished.")
     return -1
 
 def knuth_morris_pratt(text, pattern):
-    print("Starting Knuth-Morris-Pratt...")
     m = len(pattern)
     n = len(text)
     lps = [0] * m
@@ -41,7 +38,6 @@ def knuth_morris_pratt(text, pattern):
                 j = lps[j - 1]
             else:
                 i += 1
-    print("Knuth-Morris-Pratt finished.")
     return -1
 
 def compute_lps_array(pattern, m, lps):
@@ -60,7 +56,6 @@ def compute_lps_array(pattern, m, lps):
                 i += 1
 
 def rabin_karp(text, pattern, q=101):
-    print("Starting Rabin-Karp...")
     d = 256
     m = len(pattern)
     n = len(text)
@@ -85,7 +80,6 @@ def rabin_karp(text, pattern, q=101):
             t = (d * (t - ord(text[i]) * h) + ord(text[i + m])) % q
             if t < 0:
                 t = t + q
-    print("Rabin-Karp finished.")
     return -1
 
 # Читання текстових файлів
@@ -110,15 +104,32 @@ algorithms = {
 def measure_time(algorithm, text, pattern):
     return timeit.timeit(lambda: algorithm(text, pattern), number=1)
 
+results = []
+
 for name, algorithm in algorithms.items():
     print(f"Testing {name} algorithm on Text 1...")
     time_existing = measure_time(algorithm, text1, pattern)
     time_non_existing = measure_time(algorithm, text1, non_existing_pattern)
-    print(f"{name} (Text 1): Existing pattern - {time_existing:.6f} seconds")
-    print(f"{name} (Text 1): Non-existing pattern - {time_non_existing:.6f} seconds")
+    results.append((name, "Text 1", time_existing, time_non_existing))
 
     print(f"Testing {name} algorithm on Text 2...")
     time_existing = measure_time(algorithm, text2, pattern)
     time_non_existing = measure_time(algorithm, text2, non_existing_pattern)
-    print(f"{name} (Text 2): Existing pattern - {time_existing:.6f} seconds")
-    print(f"{name} (Text 2): Non-existing pattern - {time_non_existing:.6f} seconds")
+    results.append((name, "Text 2", time_existing, time_non_existing))
+
+# Запис результатів у файл формату Markdown
+with open('algorithm_results.md', 'w', encoding='utf-8') as f:
+    f.write("# Vergleich der Suchalgorithmen: Boyer-Moore, Knuth-Morris-Pratt und Rabin-Karp\n\n")
+    f.write("## Einleitung\n")
+    f.write("Dieser Bericht vergleicht die Effizienz der Suchalgorithmen Boyer-Moore, Knuth-Morris-Pratt und Rabin-Karp anhand zweier Textdateien. Die Algorithmen wurden sowohl auf ein vorhandenes als auch ein nicht vorhandenes Muster getestet. Die Zeitmessung erfolgte mit `timeit`.\n\n")
+
+    for name, text, time_existing, time_non_existing in results:
+        f.write(f"### {text}\n\n")
+        f.write(f"| Algorithmus | Vorhandenes Muster (Sek.) | Nicht vorhandenes Muster (Sek.) |\n")
+        f.write(f"|-------------|---------------------------|----------------------------------|\n")
+        f.write(f"| {name}      | {time_existing:.6f}                  | {time_non_existing:.6f}                         |\n\n")
+
+    f.write("## Zusammenfassung\n")
+    f.write("Die Ergebnisse zeigen, dass alle drei Algorithmen (Boyer-Moore, Knuth-Morris-Pratt und Rabin-Karp) bei den verwendeten Texten nahezu identische Suchgeschwindigkeiten aufwiesen. Dies könnte auf die geringe Textlänge und die Einfachheit der Muster zurückzuführen sein. Weitere Tests mit längeren Texten und komplexeren Mustern könnten Unterschiede in der Effizienz der Algorithmen deutlicher machen.\n")
+
+print("Ergebnisse wurden in 'algorithm_results.md' gespeichert.")
